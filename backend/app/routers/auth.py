@@ -1,6 +1,6 @@
 from fastapi import APIRouter,Depends, status
-from app.schemas.user import UserRegister , UserResponse
-from app.services.auth import register_user
+from app.schemas.user import UserRegister , UserResponse,LoginResponse,UserResponse,UserLogin
+from app.services.auth import register_user,login_user
 from app.dependencies import get_current_user, require_admin
 
 router = APIRouter(prefix="/api/auth", tags=["Xác thực (Auth)"])
@@ -18,6 +18,18 @@ async def register(user_data: UserRegister):
         "message": "Đăng ký tài khoản thành công!",
         "user": user
     }
+
+#feat/dang-nhap(03)
+# Endpoint Đăng nhập
+@router.post(
+    "/login",
+    response_model=LoginResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Đăng nhập tài khoản",
+    description="Xác thực thông tin tài khoản (email & mật khẩu), trả về chuỗi JWT Bearer Token và dữ liệu người dùng."
+)
+async def login(credentials: UserLogin):
+    return await login_user(credentials)
 
 #feat/jwt-auth(02)
 # Endpoint lấy thông tin người dùng từ JWT Token

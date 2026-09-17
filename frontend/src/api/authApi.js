@@ -34,3 +34,16 @@ export async function checkAdminOnly() {
     method: 'GET',
   });
   }
+
+
+  /**feat/dang-nhap(03)
+ * API Đăng nhập tài khoản & Nhận JWT Bearer Token
+ * @param {Object} credentials { email, password }
+ * @returns {Promise<Object>} { token, token_type, user }
+ */
+export async function loginUser(credentials) {
+  return await fetchClient('/auth/login', {
+    method: 'POST',
+    body: JSON.stringify(credentials),
+  });
+}
