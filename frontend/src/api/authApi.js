@@ -10,4 +10,27 @@ export async function registerUser(formData) {
     method: 'POST',
     body: JSON.stringify(formData),
   });
+
+
+
+ /**feat/jwt-auth(02) */ 
 }
+/**
+ * API Lấy thông tin tài khoản hiện tại 
+ * @returns {Promise<Object>} user
+ */
+export async function getMe() {
+  return await fetchClient('/auth/me', {
+    method: 'GET',
+  });
+}
+
+/**
+ * API Gọi endpoint bảo vệ chỉ dành cho Admin
+ * @returns {Promise<Object>} { success, message, admin }
+ */
+export async function checkAdminOnly() {
+  return await fetchClient('/auth/admin-only', {
+    method: 'GET',
+  });
+  }
