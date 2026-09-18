@@ -35,3 +35,20 @@ __pycache__/
 *.pyc
 
 .ua/
+
+
+
+#ảnh
+# Bỏ qua tất cả file ảnh theo định dạng
+*.avif
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.gif
+*.svg
+
+
+frontend/src/assets/images/
+frontend/public/images/
+backend/uploads/

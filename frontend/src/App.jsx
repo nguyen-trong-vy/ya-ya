@@ -1,49 +1,39 @@
-//feat/cau-hinh-nen-tang(00)
+//04
 
 import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
-import RegisterPage from './pages/Auth/RegisterPage';
-import LoginPage from './pages/Auth/LoginPage';
-import UnauthorizedPage from './pages/Auth/UnauthorizedPage';
-import ProtectedRoute from './components/ProtectedRoute';
-
-
-// Component trang Demo để kiểm tra đăng nhập thành công
-function DashboardDemo() {
-  return (
-    <div style={{ padding: '2rem', textAlign: 'center', fontFamily: 'sans-serif' }}>
-      <h1>Chào mừng bạn đã đăng nhập thành công!</h1>
-      <p>Đây là trang được bảo vệ bởi ProtectedRoute.</p>
-    </div>
-  );
-}
+import { CartProvider } from './context/CartContext';
+import FeaturedProducts from './components/FeaturedProducts';
+import ProductModal from './components/ProductModal';
 
 export default function App() {
+  const [selectedProduct, setSelectedProduct] = useState(null);
+
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          {/* Tuyến đường công khai */}
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/unauthorized" element={<UnauthorizedPage />} />
-          
-
-
-
-
-          {/* Tuyến đường bảo vệ mẫu */}
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <DashboardDemo />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
-      </BrowserRouter>
+      <CartProvider>
+        <BrowserRouter>
+          <main style={{ minHeight: '100vh', backgroundColor: '#FBF7F4' }}>
+            <Routes>
+              <Route
+                path="/"
+                element={
+                  <div>
+                    <FeaturedProducts onQuickView={(p) => setSelectedProduct(p)} />
+                    {selectedProduct && (
+                      <ProductModal
+                        product={selectedProduct}
+                        onClose={() => setSelectedProduct(null)}
+                      />
+                    )}
+                  </div>
+                }
+              />
+            </Routes>
+          </main>
+        </BrowserRouter>
+      </CartProvider>
     </AuthProvider>
   );
 }
