@@ -58,3 +58,48 @@ export const PRODUCTS_DATA = [
     sold: 215
   }
 ];
+
+
+//feat/danh-muc(05)
+export const CATEGORIES_DATA = [
+  {
+    id: 'banh-donut',
+    slug: 'banh-donut',
+    name: 'Bánh Donut',
+    description: 'Miếng bánh tròn xoe, ngọt ngào, mềm xốp, ai cũng mê',
+    image: '/images/danh mục sản phẩm/danh muc san pham 3.avif', // Bánh Donut
+    count: 5
+  },
+  {
+    id: 'phu-kien-banh',
+    slug: 'phu-kien-banh',
+    name: 'Phụ kiện bánh',
+    description: 'Nến xoắn, thiệp chúc mừng và phụ kiện trang trí tiệc sinh nhật',
+    image: '/images/danh mục sản phẩm/danh muc san pham 5.avif', // Phụ kiện bánh & thiệp
+    count: 5
+  },
+  {
+    id: 'banh-quy',
+    slug: 'banh-quy',
+    name: 'Bánh quy',
+    description: 'Bánh quy bơ giòn rụm, béo ngậy chuẩn phong cách Pháp',
+    image: '/images/danh mục sản phẩm/danh muc san pham 1.avif', // Đĩa bánh quy
+    count: 4
+  },
+  {
+    id: 'banh-sinh-nhat',
+    slug: 'banh-sinh-nhat',
+    name: 'Bánh sinh nhật',
+    description: 'Kiệt tác bánh kem nghệ thuật sang trọng cho ngày đặc biệt',
+    image: '/images/danh mục sản phẩm/danh muc san pham 4.avif', // Bánh sinh nhật socola
+    count: 5
+  },
+  {
+    id: 'banh-cupcake',
+    slug: 'banh-cupcake',
+    name: 'Bánh Cupcake',
+    description: 'Chiếc bánh nhỏ xinh phủ kem bơ tươi mịn màng tan chảy',
+    image: '/images/danh mục sản phẩm/danh muc san pham 2.avif', // Bánh Cupcake
+    count: 4
+  }
+];
