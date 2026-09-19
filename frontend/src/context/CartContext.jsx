@@ -1,5 +1,4 @@
-//feat thêm vào giỏ hàng (04)
-
+//feat/them-vao-gio(06)
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import confetti from 'canvas-confetti';

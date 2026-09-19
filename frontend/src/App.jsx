@@ -1,13 +1,19 @@
-//04
-//05
+//ref(00->06)
+
 import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
+import Header from './components/Header';
+import CartDrawer from './components/CartDrawer';
+import CategorySection from './components/CategorySection';
 import FeaturedProducts from './components/FeaturedProducts';
 import ProductModal from './components/ProductModal';
-import CategorySection from './components/CategorySection';
 import CategoryPage from './pages/Client/CategoryPage';
+import RegisterPage from './pages/Auth/RegisterPage';
+import LoginPage from './pages/Auth/LoginPage';
+
+
 export default function App() {
   const [selectedProduct, setSelectedProduct] = useState(null);
 
@@ -15,28 +21,53 @@ export default function App() {
     <AuthProvider>
       <CartProvider>
         <BrowserRouter>
-          <main style={{ minHeight: '100vh', backgroundColor: '#FBF7F4' }}>
-            <Routes>
-              <Route
-                path="/"
-                element={
-                  <div>
+          <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', backgroundColor: '#FBF7F4' }}>
+            {/* Thanh điều hướng Header toàn cục có giỏ hàng */}
+            <Header />
+
+            {/* Khay giỏ hàng trượt sang từ mép phải */}
+            <CartDrawer />
+
+            <main style={{ flex: 1 }}>
+              <Routes>
+                {/* Trang chủ: Kế thừa từ Commit 04 & 05 (Danh mục tròn & Sản phẩm nổi bật) */}
+                <Route
+                  path="/"
+                  element={
+                    <div>
                       <CategorySection />
-                    <FeaturedProducts onQuickView={(p) => setSelectedProduct(p)} />
-                    {selectedProduct && (
-                      <ProductModal
-                        product={selectedProduct}
-                        onClose={() => setSelectedProduct(null)}
-                      />
-                    )}
-                  </div>
-                }
-              />
-               <Route path="/categories" element={<CategoryPage />} />
-              <Route path="/categories/:slug" element={<CategoryPage /
-              >} />
-            </Routes>
-          </main>
+                      <FeaturedProducts onQuickView={(p) => setSelectedProduct(p)} />
+                      {selectedProduct && (
+                        <ProductModal
+                          product={selectedProduct}
+                          onClose={() => setSelectedProduct(null)}
+                        />
+                      )}
+                    </div>
+                  }
+                />
+
+                {/* Trang danh mục sản phẩm chi tiết có Tabs lọc & Sắp xếp */}
+                <Route path="/categories" element={<CategoryPage />} />
+                <Route path="/categories/:slug" element={<CategoryPage />} />
+
+                {/* Luồng xác thực người dùng (Auth Flow từ Commit 01 - 03) */}
+                <Route path="/register" element={<RegisterPage />} />
+                <Route path="/login" element={<LoginPage />} />
+
+                {/* Mặc định quay về Trang chủ */}
+                <Route
+                  path="*"
+                  element={
+                    <div>
+                      <CategorySection />
+                      <FeaturedProducts onQuickView={(p) => setSelectedProduct(p)} />
+                    </div>
+                  }
+                />
+              </Routes>
+            </main>
+          </div>
         </BrowserRouter>
       </CartProvider>
     </AuthProvider>
