@@ -2,12 +2,14 @@
 #khoi tao FastAPI va CORS
 #feat/SPNB-CTSP(04)
 #feat/danh-muc(05)
+#feat/dat-hang(07)
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routers import  products
 from app.core.config import settings
 from app.routers import auth
 from app.routers import categories
+from app.routers import orders
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
@@ -20,6 +22,8 @@ app = FastAPI(
 app.include_router(products.router)
 #(05)
 app.include_router(categories.router)
+#(07)
+app.include_router(orders.router)
 
 # Cấu hình CORS cho phép Frontend React gọi API
 app.add_middleware(

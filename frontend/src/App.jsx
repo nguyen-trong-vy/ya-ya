@@ -1,4 +1,5 @@
-//ref(00->06)
+//ref(00->07)
+//feat/dat-hang(07)
 
 import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
@@ -10,6 +11,9 @@ import CategorySection from './components/CategorySection';
 import FeaturedProducts from './components/FeaturedProducts';
 import ProductModal from './components/ProductModal';
 import CategoryPage from './pages/Client/CategoryPage';
+import CheckoutPage from './pages/Client/CheckoutPage';
+import OrderSuccessPage from './pages/Client/OrderSuccessPage';
+import ProtectedRoute from './components/ProtectedRoute';
 import RegisterPage from './pages/Auth/RegisterPage';
 import LoginPage from './pages/Auth/LoginPage';
 
@@ -50,6 +54,20 @@ export default function App() {
                 {/* Trang danh mục sản phẩm chi tiết có Tabs lọc & Sắp xếp */}
                 <Route path="/categories" element={<CategoryPage />} />
                 <Route path="/categories/:slug" element={<CategoryPage />} />
+
+                {/* Tuyến đường Đặt hàng & Thanh toán (Yêu cầu đăng nhập) - feat/dat-hang(07) */}
+                <Route
+                  path="/checkout"
+                  element={
+                    <ProtectedRoute>
+                      <CheckoutPage />
+                    </ProtectedRoute>
+                  }
+                />
+
+                {/* Trang đặt bánh thành công - feat/dat-hang(07) */}
+                <Route path="/order-success/:orderId" element={<OrderSuccessPage />} />
+                <Route path="/order-success" element={<OrderSuccessPage />} />
 
                 {/* Luồng xác thực người dùng (Auth Flow từ Commit 01 - 03) */}
                 <Route path="/register" element={<RegisterPage />} />
