@@ -1,5 +1,6 @@
 //feat/them-vao-gio(06)
 // có kèm đn-đk
+//feat/ho-so-va-lich-su-don(08)
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
@@ -239,12 +240,29 @@ export default function Header() {
             )}
           </button>
 
-          {/* User Auth Info / Nút Đăng nhập */}
+          {/* User Auth Info / Nút Đăng nhập - feat/ho-so-va-lich-su-don(08) */}
           {isAuthenticated ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span style={{ fontSize: '0.9rem', fontWeight: '600', color: '#451A03' }}>
-                {user?.full_name || 'Khách hàng'}
-              </span>
+              <Link
+                to="/profile"
+                title="Xem hồ sơ cá nhân & lịch sử đơn hàng"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.35rem',
+                  textDecoration: 'none',
+                  fontSize: '0.9rem',
+                  fontWeight: '600',
+                  color: '#451A03',
+                  padding: '0.35rem 0.6rem',
+                  borderRadius: '8px',
+                  backgroundColor: location.pathname === '/profile' ? '#F3EDE8' : 'transparent',
+                  transition: 'background-color 0.15s'
+                }}
+              >
+                <User size={16} />
+                <span>{user?.full_name || 'Khách hàng'}</span>
+              </Link>
               <button
                 onClick={handleLogout}
                 title="Đăng xuất"

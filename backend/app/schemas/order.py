@@ -1,4 +1,5 @@
 #feat/dat-hang(07)
+#feat/ho-so-va-lich-su-don(08)
 
 from typing import List, Optional
 from pydantic import BaseModel, Field
@@ -52,3 +53,7 @@ class OrderResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+#feat/ho-so-va-lich-su-don(08)
+class OrderStatusUpdate(BaseModel):
+    order_status: str = Field(..., description="Trạng thái đơn hàng: PENDING, CONFIRMED, DELIVERING, COMPLETED, CANCELLED")

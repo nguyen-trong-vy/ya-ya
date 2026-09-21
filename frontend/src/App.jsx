@@ -1,5 +1,5 @@
-//ref(00->07)
-//feat/dat-hang(07)
+//ref(00->08)
+//feat/ho-so-va-lich-su-don(08)
 
 import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
@@ -13,6 +13,7 @@ import ProductModal from './components/ProductModal';
 import CategoryPage from './pages/Client/CategoryPage';
 import CheckoutPage from './pages/Client/CheckoutPage';
 import OrderSuccessPage from './pages/Client/OrderSuccessPage';
+import ProfilePage from './pages/Client/ProfilePage';
 import ProtectedRoute from './components/ProtectedRoute';
 import RegisterPage from './pages/Auth/RegisterPage';
 import LoginPage from './pages/Auth/LoginPage';
@@ -68,6 +69,16 @@ export default function App() {
                 {/* Trang đặt bánh thành công - feat/dat-hang(07) */}
                 <Route path="/order-success/:orderId" element={<OrderSuccessPage />} />
                 <Route path="/order-success" element={<OrderSuccessPage />} />
+
+                {/* Hồ sơ cá nhân & Lịch sử đơn hàng (Yêu cầu đăng nhập) - feat/ho-so-va-lich-su-don(08) */}
+                <Route
+                  path="/profile"
+                  element={
+                    <ProtectedRoute>
+                      <ProfilePage />
+                    </ProtectedRoute>
+                  }
+                />
 
                 {/* Luồng xác thực người dùng (Auth Flow từ Commit 01 - 03) */}
                 <Route path="/register" element={<RegisterPage />} />

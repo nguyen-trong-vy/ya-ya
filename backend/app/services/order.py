@@ -1,4 +1,5 @@
 #feat/dat-hang(07)
+#feat/ho-so-va-lich-su-don(08)
 
 from datetime import datetime, timezone
 import uuid
@@ -105,3 +106,27 @@ async def create_order(user_id: str, data: OrderCreate) -> dict:
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Lỗi hệ thống khi tạo đơn hàng: {str(e)}"
         )
+
+#feat/ho-so-va-lich-su-don(08)
+async def get_user_orders(user_id: str) -> List[dict]:
+    """
+    Lấy danh sách các đơn hàng của khách hàng đang đăng nhập kèm chi tiết từng món.
+    Sắp xếp theo thời gian tạo mới nhất lên đầu.
+    """
+    supabase = get_supabase()
+    try:
+        res = (
+            supabase.table("orders")
+            .select("*, items:order_items(*)")
+            .eq("user_id", user_id)
+            .order("created_at", desc=True)
+            .execute()
+        )
+        return res.data or []
+    except Exception as e:
+        print(f"[ERROR get_user_orders] {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Lỗi khi lấy lịch sử đơn hàng: {str(e)}"
+        )
+
