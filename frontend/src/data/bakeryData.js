@@ -103,3 +103,61 @@ export const CATEGORIES_DATA = [
     count: 4
   }
 ];
+
+//feat/heroslide(09)
+export const SLIDES_DATA = [
+  {
+    id: 1,
+    type: 'image',
+    src: '/images/slide/slide1.avif',
+    tagline: 'BÁNH DÀNH CHO MÙA LỄ HỘI',
+    title: 'Cùng nhau mở ra sự kỳ diệu!',
+    ctaText: 'Khám phá Phụ kiện bánh',
+    ctaLink: '#categories',
+  },
+  {
+    id: 2,
+    type: 'video',
+    src: '/images/slide/slide2.mp4',
+    tagline: 'TINH HOA NGHỆ THUẬT BÁNH NGỌT',
+    title: 'Ngọt ngào từng khoảnh khắc!',
+    ctaText: 'Xem Sản phẩm nổi bật',
+    ctaLink: '#featured',
+  },
+  {
+    id: 3,
+    type: 'image',
+    src: '/images/slide/slide3.avif',
+    tagline: 'NGUYÊN LIỆU THƯỢNG HẠNG 100%',
+    title: 'Hương vị chạm đến trái tim!',
+    ctaText: 'Khám phá Bánh sinh nhật',
+    ctaLink: '#categories',
+  },
+  {
+    id: 4,
+    type: 'image',
+    src: '/images/slide/slide4.avif',
+    tagline: 'BÁNH TƯƠI RA LÒ MỖI NGÀY',
+    title: 'Món quà trọn vẹn yêu thương!',
+    ctaText: 'Đặt bánh ngay',
+    ctaLink: '#featured',
+  },
+  {
+    id: 5,
+    type: 'image',
+    src: '/images/slide/slide5.avif',
+    tagline: 'ĐẲNG CẤP TIỆM BÁNH THỦ CÔNG',
+    title: 'Đậm đà phong vị Yuu Cake!',
+    ctaText: 'Xem toàn bộ bánh',
+    ctaLink: '#categories',
+  }
+];
+
+export const TICKER_ITEMS = [
+  { icon: '📞', text: 'Đặt bánh gọi ngay 0944100001' },
+  { icon: '📦', text: 'Miễn phí vận chuyển trong phạm vi 2km' },
+  { icon: '🎂', text: 'Bánh nướng tươi mỗi ngày, chuẩn vị thủ công' },
+  { icon: '📞', text: 'Đặt bánh gọi ngay 09441000011' },
+  { icon: '📦', text: 'Miễn phí vận chuyển trong phạm vi 2km' },
+  { icon: '✨', text: 'Tặng kèm dao dĩa & nến nghệ thuật cho mỗi đơn bánh sinh nhật' }
+];

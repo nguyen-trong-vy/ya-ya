@@ -1,5 +1,6 @@
-//ref(00->08)
+//ref(00->09)
 //feat/ho-so-va-lich-su-don(08)
+//feat/heroslide(09)
 
 import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
@@ -7,6 +8,7 @@ import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import Header from './components/Header';
 import CartDrawer from './components/CartDrawer';
+import HeroSlider from './components/HeroSlider';
 import CategorySection from './components/CategorySection';
 import FeaturedProducts from './components/FeaturedProducts';
 import ProductModal from './components/ProductModal';
@@ -35,12 +37,18 @@ export default function App() {
 
             <main style={{ flex: 1 }}>
               <Routes>
-                {/* Trang chủ: Kế thừa từ Commit 04 & 05 (Danh mục tròn & Sản phẩm nổi bật) */}
+                {/* Trang chủ với HeroSlider đứng đầu - feat/heroslide(09) */}
                 <Route
                   path="/"
                   element={
                     <div>
+                      {/* Khối 1: Hero Banner Slider & Ticker Marquee */}
+                      <HeroSlider />
+
+                      {/* Khối 2: Danh mục sản phẩm */}
                       <CategorySection />
+
+                      {/* Khối 3: Sản phẩm nổi bật */}
                       <FeaturedProducts onQuickView={(p) => setSelectedProduct(p)} />
                       {selectedProduct && (
                         <ProductModal
@@ -84,11 +92,12 @@ export default function App() {
                 <Route path="/register" element={<RegisterPage />} />
                 <Route path="/login" element={<LoginPage />} />
 
-                {/* Mặc định quay về Trang chủ */}
+                {/* Tuyến đường mặc định - feat/heroslide(09) */}
                 <Route
                   path="*"
                   element={
                     <div>
+                      <HeroSlider />
                       <CategorySection />
                       <FeaturedProducts onQuickView={(p) => setSelectedProduct(p)} />
                     </div>
