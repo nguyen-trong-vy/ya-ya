@@ -1,9 +1,10 @@
-//ref(00->12)
+//ref(00->13)
 //feat/ho-so-va-lich-su-don(08)
 //feat/heroslide(09)
 //feat/blog-va-tin-tuc(10)
 //feat/footer(11)
 //feat/admin-dashboard(12)
+//feat/quan-ly-don-hang(13)
 
 import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
@@ -26,6 +27,7 @@ import RegisterPage from './pages/Auth/RegisterPage';
 import LoginPage from './pages/Auth/LoginPage';
 import UnauthorizedPage from './pages/Auth/UnauthorizedPage';
 import AdminDashboard from './pages/Admin/AdminDashboard';
+import OrderManagePage from './pages/Admin/OrderManagePage';
 
 
 // Điều hướng Trang chủ: Khách xem giao diện bán bánh, Admin chuyển thẳng vào Dashboard
@@ -127,6 +129,16 @@ export default function App() {
                   element={
                     <ProtectedRoute requiredRole="admin">
                       <AdminDashboard />
+                    </ProtectedRoute>
+                  }
+                />
+
+                {/* Quản lý đơn hàng & xác nhận tiền mặt (Yêu cầu quyền Admin) - feat/quan-ly-don-hang(13) */}
+                <Route
+                  path="/admin/orders"
+                  element={
+                    <ProtectedRoute requiredRole="admin">
+                      <OrderManagePage />
                     </ProtectedRoute>
                   }
                 />

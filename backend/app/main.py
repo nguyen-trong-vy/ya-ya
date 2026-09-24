@@ -4,7 +4,9 @@
 #feat/danh-muc(05)
 #feat/dat-hang(07)
 #feat/admin-dashboard(12)
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from app.routers import  products
 from app.core.config import settings
@@ -19,6 +21,16 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
 )
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    print("=" * 60)
+    print(f"[FASTAPI 422 VALIDATION ERROR]: {exc.errors()}")
+    print("=" * 60)
+    return JSONResponse(
+        status_code=422,
+        content={"detail": exc.errors()}
+    )
 
 #(04)
 app.include_router(products.router)

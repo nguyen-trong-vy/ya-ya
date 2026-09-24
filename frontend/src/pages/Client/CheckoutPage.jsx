@@ -30,8 +30,16 @@ export default function CheckoutPage() {
   const { cartItems, cartTotal, clearCart } = useCart();
   const navigate = useNavigate();
 
-  // Lấy ngày hôm nay định dạng YYYY-MM-DD làm giá trị min
-  const todayStr = new Date().toISOString().split('T')[0];
+  // Lấy ngày hôm nay định dạng YYYY-MM-DD theo giờ địa phương
+  const getTodayDateString = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const todayStr = getTodayDateString();
 
   const [formData, setFormData] = useState({
     recipient_name: user?.full_name || '',
@@ -74,8 +82,34 @@ export default function CheckoutPage() {
       return;
     }
 
-    if (!formData.recipient_name.trim() || !formData.recipient_phone.trim() || !formData.delivery_address.trim()) {
-      setErrorMsg('Vui lòng điền đầy đủ Họ tên, Số điện thoại và Địa chỉ giao nhận bánh.');
+    const name = formData.recipient_name.trim();
+    const phone = formData.recipient_phone.trim();
+    const address = formData.delivery_address.trim();
+    const date = formData.delivery_date ? formData.delivery_date.trim() : '';
+    const timeSlot = formData.delivery_time_slot ? formData.delivery_time_slot.trim() : '';
+
+    if (!name || name.length < 2) {
+      setErrorMsg('Vui lòng nhập Họ tên người nhận bánh (tối thiểu 2 ký tự).');
+      return;
+    }
+
+    if (!phone || phone.length < 8 || phone.length > 15) {
+      setErrorMsg('Vui lòng nhập Số điện thoại nhận bánh từ 8 đến 15 ký tự.');
+      return;
+    }
+
+    if (!address || address.length < 5) {
+      setErrorMsg('Vui lòng nhập Địa chỉ giao bánh chi tiết (tối thiểu 5 ký tự).');
+      return;
+    }
+
+    if (!date) {
+      setErrorMsg('Vui lòng chọn Ngày giao bánh.');
+      return;
+    }
+
+    if (!timeSlot) {
+      setErrorMsg('Vui lòng chọn Khung giờ nhận bánh.');
       return;
     }
 
@@ -83,22 +117,29 @@ export default function CheckoutPage() {
       setIsSubmitting(true);
       setErrorMsg(null);
 
-      // Chuẩn bị payload khớp Schema OrderCreate
+      // Chuẩn bị payload khớp Schema OrderCreate (đảm bảo kiểu dữ liệu sạch 100%)
       const payload = {
-        recipient_name: formData.recipient_name.trim(),
-        recipient_phone: formData.recipient_phone.trim(),
-        recipient_email: formData.recipient_email ? formData.recipient_email.trim() : null,
-        delivery_address: formData.delivery_address.trim(),
-        delivery_date: formData.delivery_date,
-        delivery_time_slot: formData.delivery_time_slot,
-        greeting_card_message: formData.greeting_card_message ? formData.greeting_card_message.trim() : null,
-        items: cartItems.map(item => ({
-          product_id: item.product.id && item.product.id.length > 20 ? item.product.id : null,
-          product_slug: item.product.slug,
-          product_name: item.product.name,
-          unit_price: Number(item.product.price),
-          quantity: Number(item.quantity)
-        }))
+        recipient_name: name,
+        recipient_phone: phone,
+        recipient_email: formData.recipient_email?.trim() || null,
+        delivery_address: address,
+        delivery_date: date,
+        delivery_time_slot: timeSlot,
+        greeting_card_message: formData.greeting_card_message?.trim() || null,
+        items: cartItems.map(item => {
+          const rawPrice = item.product?.price;
+          const cleanPrice = typeof rawPrice === 'string'
+            ? parseFloat(rawPrice.replace(/[^\d.]/g, '')) || 0
+            : Number(rawPrice) || 0;
+
+          return {
+            product_id: item.product?.id && String(item.product.id).length > 20 ? String(item.product.id) : null,
+            product_slug: item.product?.slug || null,
+            product_name: item.product?.name || 'Bánh ngọt Yuu Cake',
+            unit_price: cleanPrice,
+            quantity: Math.max(1, parseInt(item.quantity, 10) || 1)
+          };
+        })
       };
 
       const result = await createOrder(payload);
@@ -224,7 +265,11 @@ export default function CheckoutPage() {
                     borderRadius: '10px',
                     border: '1px solid #E5D7CC',
                     outline: 'none',
-                    fontSize: '0.95rem'
+                    fontSize: '0.95rem',
+                    backgroundColor: '#FFFFFF',
+                    color: '#3D1C06',
+                    colorScheme: 'light',
+                    boxSizing: 'border-box'
                   }}
                 />
               </div>
@@ -246,7 +291,11 @@ export default function CheckoutPage() {
                     borderRadius: '10px',
                     border: '1px solid #E5D7CC',
                     outline: 'none',
-                    fontSize: '0.95rem'
+                    fontSize: '0.95rem',
+                    backgroundColor: '#FFFFFF',
+                    color: '#3D1C06',
+                    colorScheme: 'light',
+                    boxSizing: 'border-box'
                   }}
                 />
               </div>
@@ -269,7 +318,11 @@ export default function CheckoutPage() {
                   borderRadius: '10px',
                   border: '1px solid #E5D7CC',
                   outline: 'none',
-                  fontSize: '0.95rem'
+                  fontSize: '0.95rem',
+                  backgroundColor: '#FFFFFF',
+                  color: '#3D1C06',
+                  colorScheme: 'light',
+                  boxSizing: 'border-box'
                 }}
               />
             </div>
@@ -292,7 +345,11 @@ export default function CheckoutPage() {
                   borderRadius: '10px',
                   border: '1px solid #E5D7CC',
                   outline: 'none',
-                  fontSize: '0.95rem'
+                  fontSize: '0.95rem',
+                  backgroundColor: '#FFFFFF',
+                  color: '#3D1C06',
+                  colorScheme: 'light',
+                  boxSizing: 'border-box'
                 }}
               />
             </div>
@@ -317,7 +374,11 @@ export default function CheckoutPage() {
                     border: '1px solid #E5D7CC',
                     outline: 'none',
                     fontSize: '0.95rem',
-                    backgroundColor: '#FFFFFF'
+                    backgroundColor: '#FFFFFF',
+                    color: '#3D1C06',
+                    colorScheme: 'light',
+                    cursor: 'pointer',
+                    boxSizing: 'border-box'
                   }}
                 />
               </div>
@@ -338,11 +399,16 @@ export default function CheckoutPage() {
                     outline: 'none',
                     fontSize: '0.95rem',
                     backgroundColor: '#FFFFFF',
-                    cursor: 'pointer'
+                    color: '#3D1C06',
+                    colorScheme: 'light',
+                    cursor: 'pointer',
+                    boxSizing: 'border-box'
                   }}
                 >
                   {TIME_SLOTS.map((slot, idx) => (
-                    <option key={idx} value={slot}>{slot}</option>
+                    <option key={idx} value={slot} style={{ backgroundColor: '#FFFFFF', color: '#3D1C06' }}>
+                      {slot}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -368,7 +434,11 @@ export default function CheckoutPage() {
                   outline: 'none',
                   fontSize: '0.95rem',
                   fontFamily: 'inherit',
-                  resize: 'none'
+                  resize: 'none',
+                  backgroundColor: '#FFFFFF',
+                  color: '#3D1C06',
+                  colorScheme: 'light',
+                  boxSizing: 'border-box'
                 }}
               />
             </div>

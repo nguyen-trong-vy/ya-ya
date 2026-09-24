@@ -1,5 +1,6 @@
 #feat/dat-hang(07)
 #feat/ho-so-va-lich-su-don(08)
+#feat/quan-ly-don-hang(13)
 
 from typing import List, Optional
 from pydantic import BaseModel, Field
@@ -13,13 +14,13 @@ class OrderItemCreate(BaseModel):
 
 class OrderCreate(BaseModel):
     recipient_name: str = Field(..., min_length=2, max_length=100, description="Họ tên người nhận bánh")
-    recipient_phone: str = Field(..., min_length=8, max_length=15, description="Số điện thoại liên hệ")
+    recipient_phone: str = Field(..., min_length=6, max_length=25, description="Số điện thoại liên hệ")
     recipient_email: Optional[str] = Field(None, description="Email nhận thông báo đơn hàng")
-    delivery_address: str = Field(..., min_length=5, max_length=300, description="Địa chỉ giao bánh chi tiết")
+    delivery_address: str = Field(..., min_length=3, max_length=300, description="Địa chỉ giao bánh chi tiết")
     delivery_date: str = Field(..., description="Ngày giao bánh (YYYY-MM-DD)")
     delivery_time_slot: str = Field(..., description="Khung giờ giao bánh")
-    greeting_card_message: Optional[str] = Field(None, max_length=250, description="Lời chúc thiệp tặng kèm")
-    items: List[OrderItemCreate] = Field(..., min_items=1, description="Danh sách các món bánh trong đơn")
+    greeting_card_message: Optional[str] = Field(None, max_length=500, description="Lời chúc thiệp tặng kèm")
+    items: List[OrderItemCreate] = Field(..., min_length=1, description="Danh sách các món bánh trong đơn")
 
 class OrderItemResponse(BaseModel):
     id: str

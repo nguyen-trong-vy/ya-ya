@@ -23,10 +23,21 @@ export async function fetchClient(endpoint, options = {}) {
     const data = await response.json().catch(() => null);
 
     if (!response.ok) {
-      const errorMessage =
-        (data && (data.detail || data.message)) ||
-        response.statusText ||
-        'Đã xảy ra lỗi khi gọi máy chủ';
+      let errorMessage = response.statusText || 'Đã xảy ra lỗi khi gọi máy chủ';
+      if (data) {
+        if (typeof data.detail === 'string') {
+          errorMessage = data.detail;
+        } else if (Array.isArray(data.detail)) {
+          errorMessage = data.detail
+            .map((d) => {
+              const loc = d.loc ? d.loc.filter((x) => x !== 'body').join('.') : '';
+              return loc ? `${loc}: ${d.msg}` : d.msg;
+            })
+            .join('; ');
+        } else if (data.message) {
+          errorMessage = data.message;
+        }
+      }
 
       const error = new Error(errorMessage);
       error.status = response.status;

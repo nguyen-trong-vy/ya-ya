@@ -1,5 +1,6 @@
 #feat/dat-hang(07)
 #feat/ho-so-va-lich-su-don(08)
+#feat/quan-ly-don-hang(13)
 
 from datetime import datetime, timezone
 import uuid
@@ -128,5 +129,117 @@ async def get_user_orders(user_id: str) -> List[dict]:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Lỗi khi lấy lịch sử đơn hàng: {str(e)}"
+        )
+
+#feat/quan-ly-don-hang(13)
+async def get_admin_orders(
+    order_status: Optional[str] = None,
+    payment_status: Optional[str] = None
+) -> List[dict]:
+    """
+    Tính năng 4.2: Admin xem toàn bộ danh sách đơn hàng kèm chi tiết các món,
+    hỗ trợ lọc theo trạng thái đơn hàng và trạng thái thanh toán.
+    """
+    supabase = get_supabase()
+    try:
+        query = supabase.table("orders").select("*, items:order_items(*)")
+
+        if order_status:
+            query = query.eq("order_status", order_status)
+        if payment_status:
+            query = query.eq("payment_status", payment_status)
+
+        res = query.order("created_at", desc=True).execute()
+        return res.data or []
+    except Exception as e:
+        print(f"[ERROR get_admin_orders] {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Lỗi khi truy vấn danh sách đơn hàng cho Admin: {str(e)}"
+        )
+
+async def confirm_order_payment_service(order_id: str) -> dict:
+    """
+    Tính năng 4.3: Xác nhận đã nhận tiền khi gặp mặt (DIRECT_MEETUP).
+    Cập nhật: payment_status = 'PAID', order_status = 'COMPLETED', paid_at = NOW()
+    """
+    supabase = get_supabase()
+    try:
+        now_str = datetime.now(timezone.utc).isoformat()
+        res = (
+            supabase.table("orders")
+            .update({
+                "payment_status": "PAID",
+                "order_status": "COMPLETED",
+                "paid_at": now_str,
+                "updated_at": now_str
+            })
+            .eq("id", order_id)
+            .execute()
+        )
+
+        if not res.data or len(res.data) == 0:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Không tìm thấy đơn hàng với mã ID: {order_id}"
+            )
+
+        # Lấy lại thông tin hoàn chỉnh kèm items
+        full_order = (
+            supabase.table("orders")
+            .select("*, items:order_items(*)")
+            .eq("id", order_id)
+            .execute()
+        )
+        return full_order.data[0] if full_order.data else res.data[0]
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[ERROR confirm_order_payment_service] {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Lỗi khi xác nhận thanh toán đơn hàng: {str(e)}"
+        )
+
+async def update_order_status_service(order_id: str, new_status: str) -> dict:
+    """
+    Tính năng 4.2: Cập nhật trạng thái đơn hàng (PENDING, CONFIRMED, DELIVERING, COMPLETED, CANCELLED).
+    """
+    valid_statuses = {"PENDING", "CONFIRMED", "DELIVERING", "COMPLETED", "CANCELLED"}
+    if new_status not in valid_statuses:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Trạng thái '{new_status}' không hợp lệ. Phải thuộc: {', '.join(valid_statuses)}"
+        )
+
+    supabase = get_supabase()
+    try:
+        now_str = datetime.now(timezone.utc).isoformat()
+        res = (
+            supabase.table("orders")
+            .update({"order_status": new_status, "updated_at": now_str})
+            .eq("id", order_id)
+            .execute()
+        )
+        if not res.data or len(res.data) == 0:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Không tìm thấy đơn hàng với mã ID: {order_id}"
+            )
+
+        full_order = (
+            supabase.table("orders")
+            .select("*, items:order_items(*)")
+            .eq("id", order_id)
+            .execute()
+        )
+        return full_order.data[0] if full_order.data else res.data[0]
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[ERROR update_order_status_service] {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Lỗi khi cập nhật trạng thái đơn hàng: {str(e)}"
         )
 
