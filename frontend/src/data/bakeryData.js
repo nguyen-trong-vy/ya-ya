@@ -61,6 +61,7 @@ export const PRODUCTS_DATA = [
 
 
 //feat/danh-muc(05)
+//feat/footer(11)
 export const CATEGORIES_DATA = [
   {
     id: 'banh-donut',

@@ -1,13 +1,15 @@
-//ref(00->10)
+//ref(00->11)
 //feat/ho-so-va-lich-su-don(08)
 //feat/heroslide(09)
 //feat/blog-va-tin-tuc(10)
+//feat/footer(11)
 
 import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import Header from './components/Header';
+import Footer from './components/Footer';
 import CartDrawer from './components/CartDrawer';
 import HeroSlider from './components/HeroSlider';
 import CategorySection from './components/CategorySection';
@@ -112,6 +114,9 @@ export default function App() {
                 />
               </Routes>
             </main>
+
+            {/* Chân trang toàn cục Yuu Cake - feat/footer(11) */}
+            <Footer />
           </div>
         </BrowserRouter>
       </CartProvider>
