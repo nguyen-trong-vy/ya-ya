@@ -160,4 +160,51 @@ export const TICKER_ITEMS = [
   { icon: '📞', text: 'Đặt bánh gọi ngay 09441000011' },
   { icon: '📦', text: 'Miễn phí vận chuyển trong phạm vi 2km' },
   { icon: '✨', text: 'Tặng kèm dao dĩa & nến nghệ thuật cho mỗi đơn bánh sinh nhật' }
-];
+];
+
+//feat/blog-va-tin-tuc(10)
+export const BLOG_POSTS_DATA = [
+  {
+    id: 1,
+    tag: 'Tin tức',
+    title: 'Giáng sinh ngập tràn - Nhận ưu đãi giảm giá',
+    excerpt: 'Mùa Giáng Sinh an lành đang đến gần, không khí se lạnh hòa cùng niềm hân hoan của mỗi nhà. Tiệm bánh YuuCake gửi tặng bạn voucher khủng giảm tới 50% cho tất cả các mẫu bánh mùa lễ hội...',
+    content: 'Những chiếc bánh khúc cây socola bồng bềnh, bánh kem ông già Noel và bánh quy gừng thơm lừng đã sẵn sàng trên kệ. Hãy ghé ngay tiệm bánh của Vy hoặc đặt hàng trực tuyến để nhận ưu đãi lên đến 50% ngay hôm nay!',
+    image: '/images/blog/blog 1.avif',
+    author: {
+      name: 'Vy Vy (Chủ tiệm)',
+      avatar: '/images/danh mục sản phẩm/danh muc san pham 1.avif'
+    },
+    date: '23/12/2024',
+    isHero: true
+  },
+  {
+    id: 2,
+    tag: 'Mẹo hay',
+    title: 'Bí quyết chọn size bánh sinh nhật vừa vặn cho từng bữa tiệc',
+    excerpt: 'Làm thế nào để chọn chiếc bánh vừa vặn số lượng khách mà vẫn giữ trọn nét tinh tế, sang trọng? Cùng YuuCake khám phá hướng dẫn chọn bánh chuẩn xác...',
+    content: 'Chọn bánh 16cm cho tiệc gia đình 4-6 người, 20cm cho nhóm bạn 8-12 người và bánh 2 tầng lộng lẫy cho các bữa tiệc sinh nhật đông vui trên 20 khách...',
+    image: '/images/blog/blog 2.avif',
+    author: {
+      name: 'Yuu Baker',
+      avatar: '/images/danh mục sản phẩm/danh muc san pham 2.avif'
+    },
+    date: '18/12/2024',
+    isHero: false
+  },
+  {
+    id: 3,
+    tag: 'Câu chuyện',
+    title: 'Hành trình tìm kiếm socola Bỉ thượng hạng cho chiếc bánh của Vy',
+    excerpt: 'Mỗi chiếc bánh kem socola tại Yuu Cake đều khởi nguồn từ những thanh sô-cô-la Bỉ nguyên chất 70%, kết tinh hương vị đắng êm dịu và thơm ngậy khó quên...',
+    content: 'Chúng tôi tin rằng nguyên liệu tử tế tạo nên hương vị chân thực. Từng mẻ kem ganache được khuấy bằng tay tỉ mỉ mỗi sáng để đảm bảo độ bóng mịn hoàn hảo...',
+    image: '/images/blog/blog 3.avif',
+    author: {
+      name: 'Vy Vy (Chủ tiệm)',
+      avatar: '/images/danh mục sản phẩm/danh muc san pham 1.avif'
+    },
+    date: '10/12/2024',
+    isHero: false
+  }
+];
+

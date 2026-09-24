@@ -1,6 +1,7 @@
-//ref(00->09)
+//ref(00->10)
 //feat/ho-so-va-lich-su-don(08)
 //feat/heroslide(09)
+//feat/blog-va-tin-tuc(10)
 
 import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
@@ -11,6 +12,7 @@ import CartDrawer from './components/CartDrawer';
 import HeroSlider from './components/HeroSlider';
 import CategorySection from './components/CategorySection';
 import FeaturedProducts from './components/FeaturedProducts';
+import BlogSection from './components/BlogSection';
 import ProductModal from './components/ProductModal';
 import CategoryPage from './pages/Client/CategoryPage';
 import CheckoutPage from './pages/Client/CheckoutPage';
@@ -37,7 +39,7 @@ export default function App() {
 
             <main style={{ flex: 1 }}>
               <Routes>
-                {/* Trang chủ với HeroSlider đứng đầu - feat/heroslide(09) */}
+                {/* Trang chủ với đầy đủ các khối trình diễn - feat/blog-va-tin-tuc(10) */}
                 <Route
                   path="/"
                   element={
@@ -50,6 +52,11 @@ export default function App() {
 
                       {/* Khối 3: Sản phẩm nổi bật */}
                       <FeaturedProducts onQuickView={(p) => setSelectedProduct(p)} />
+
+                      {/* Khối 4: Blog & Tin tức ưu đãi lễ hội */}
+                      <BlogSection />
+
+                      {/* Modal xem nhanh sản phẩm khi xem danh mục/nổi bật */}
                       {selectedProduct && (
                         <ProductModal
                           product={selectedProduct}
