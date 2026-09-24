@@ -1,4 +1,5 @@
 //feat/dang-nhap(03)
+//feat/admin-dashboard(12)
 
 
 import React, { useState } from 'react';
@@ -66,8 +67,8 @@ export default function LoginPage() {
       login(response.token, response.user);
       setSuccess(`Chào mừng bạn trở lại, ${response.user.full_name}!`);
 
-      // 4. Chuyển hướng sau 1 giây: Nếu trước đó bị đá từ trang nào thì quay lại trang đó
-      const destination = fromPath || '/';
+      // 4. Chuyển hướng sau 1 giây: Nếu là admin chuyển thẳng vào /admin, nếu khách thì về trang trước hoặc trang chủ
+      const destination = response.user?.role === 'admin' ? '/admin' : (fromPath || '/');
       setTimeout(() => {
         navigate(destination, { replace: true });
       }, 1000);

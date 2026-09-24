@@ -1,12 +1,13 @@
 //feat/them-vao-gio(06)
 // có kèm đn-đk
 //feat/ho-so-va-lich-su-don(08)
+//feat/admin-dashboard(12)
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
-import { ShoppingBag, User, LogOut, ChevronDown } from 'lucide-react';
+import { ShoppingBag, User, LogOut, ChevronDown, ShieldCheck } from 'lucide-react';
 import { CATEGORIES_DATA } from '../data/bakeryData';
 
 export default function Header() {
@@ -56,7 +57,7 @@ export default function Header() {
       }}>
         {/* Brand Logo - Yuu Cake */}
         <Link
-          to="/"
+          to={user?.role === 'admin' ? '/admin' : '/'}
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -75,194 +76,262 @@ export default function Header() {
           }}>
             Yuu Cake
           </span>
+          {user?.role === 'admin' && (
+            <span style={{
+              background: '#DC2626',
+              color: '#FFFFFF',
+              fontSize: '0.68rem',
+              fontWeight: '800',
+              padding: '0.15rem 0.45rem',
+              borderRadius: '6px',
+              letterSpacing: '0.5px'
+            }}>
+              ADMIN
+            </span>
+          )}
         </Link>
 
-        {/* Navigation Links */}
-        <nav style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.625rem'
-        }}>
-          {/* Trang chủ */}
-          <Link
-            to="/"
-            style={{
-              textDecoration: 'none',
-              padding: '0.45rem 1.1rem',
-              borderRadius: '8px',
-              backgroundColor: isHome ? '#E2B89D' : 'transparent',
-              color: '#3D1C06',
-              fontWeight: isHome ? '700' : '600',
-              fontSize: '0.98rem',
-              transition: 'all 0.2s'
-            }}
-          >
-            Trang chủ
-          </Link>
-
-          {/* Sản phẩm Dropdown Menu */}
-          <div ref={dropdownRef} style={{ position: 'relative' }}>
-            <button
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+        {/* Navigation Links - Ẩn khi là Admin, chỉ giữ điều hướng Admin */}
+        {user?.role === 'admin' ? (
+          <nav style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.625rem'
+          }}>
+            <Link
+              to="/admin"
               style={{
-                background: 'none',
-                border: 'none',
-                padding: '0.45rem 0.9rem',
+                textDecoration: 'none',
+                padding: '0.45rem 1.1rem',
+                borderRadius: '8px',
+                backgroundColor: '#FEE2E2',
+                color: '#DC2626',
+                fontWeight: '700',
+                fontSize: '0.95rem',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.25rem',
-                color: '#3D1C06',
-                fontWeight: location.pathname.startsWith('/categories') ? '700' : '600',
-                backgroundColor: location.pathname.startsWith('/categories') ? '#E2B89D' : 'transparent',
-                fontSize: '0.98rem',
-                cursor: 'pointer',
+                gap: '0.35rem'
+              }}
+            >
+              <ShieldCheck size={18} />
+              <span>Bảng Điều Khiển Quản Trị</span>
+            </Link>
+          </nav>
+        ) : (
+          <nav style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.625rem'
+          }}>
+            {/* Trang chủ */}
+            <Link
+              to="/"
+              style={{
+                textDecoration: 'none',
+                padding: '0.45rem 1.1rem',
                 borderRadius: '8px',
+                backgroundColor: isHome ? '#E2B89D' : 'transparent',
+                color: '#3D1C06',
+                fontWeight: isHome ? '700' : '600',
+                fontSize: '0.98rem',
                 transition: 'all 0.2s'
               }}
             >
-              <span>Sản phẩm</span>
-              <ChevronDown
-                size={16}
-                style={{
-                  transform: isDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-                  transition: 'transform 0.2s'
-                }}
-              />
-            </button>
+              Trang chủ
+            </Link>
 
-            {/* Dropdown Menu xổ xuống */}
-            {isDropdownOpen && (
-              <div style={{
-                position: 'absolute',
-                top: '110%',
-                left: 0,
-                width: '230px',
-                backgroundColor: '#FFFFFF',
-                borderRadius: '14px',
-                boxShadow: '0 12px 30px rgba(69, 26, 3, 0.12)',
-                border: '1px solid #F0E8E2',
-                padding: '0.5rem',
-                zIndex: 60,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '2px'
-              }}>
-                <Link
-                  to="/categories"
-                  onClick={() => setIsDropdownOpen(false)}
+            {/* Sản phẩm Dropdown Menu */}
+            <div ref={dropdownRef} style={{ position: 'relative' }}>
+              <button
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  padding: '0.45rem 0.9rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.25rem',
+                  color: '#3D1C06',
+                  fontWeight: location.pathname.startsWith('/categories') ? '700' : '600',
+                  backgroundColor: location.pathname.startsWith('/categories') ? '#E2B89D' : 'transparent',
+                  fontSize: '0.98rem',
+                  cursor: 'pointer',
+                  borderRadius: '8px',
+                  transition: 'all 0.2s'
+                }}
+              >
+                <span>Sản phẩm</span>
+                <ChevronDown
+                  size={16}
                   style={{
-                    padding: '0.6rem 0.85rem',
-                    borderRadius: '8px',
-                    textDecoration: 'none',
-                    color: '#451A03',
-                    fontWeight: '700',
-                    fontSize: '0.9rem',
-                    backgroundColor: '#FDFBF7'
+                    transform: isDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                    transition: 'transform 0.2s'
                   }}
-                >
-                  ✨ Xem tất cả bánh
-                </Link>
-                <div style={{ height: '1px', backgroundColor: '#F3EDE8', margin: '4px 0' }} />
-                {CATEGORIES_DATA.map(cat => (
+                />
+              </button>
+
+              {/* Dropdown Menu xổ xuống */}
+              {isDropdownOpen && (
+                <div style={{
+                  position: 'absolute',
+                  top: '110%',
+                  left: 0,
+                  width: '230px',
+                  backgroundColor: '#FFFFFF',
+                  borderRadius: '14px',
+                  boxShadow: '0 12px 30px rgba(69, 26, 3, 0.12)',
+                  border: '1px solid #F0E8E2',
+                  padding: '0.5rem',
+                  zIndex: 60,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '2px'
+                }}>
                   <Link
-                    key={cat.id || cat.slug}
-                    to={`/categories/${cat.slug}`}
+                    to="/categories"
                     onClick={() => setIsDropdownOpen(false)}
                     style={{
-                      padding: '0.55rem 0.85rem',
+                      padding: '0.6rem 0.85rem',
                       borderRadius: '8px',
                       textDecoration: 'none',
-                      color: '#4A2818',
+                      color: '#451A03',
+                      fontWeight: '700',
                       fontSize: '0.9rem',
-                      fontWeight: '500',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      transition: 'background-color 0.15s'
+                      backgroundColor: '#FDFBF7'
                     }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#FDFBF7'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                   >
-                    <span>{cat.name}</span>
-                    <span style={{ fontSize: '0.75rem', color: '#A89990' }}>({cat.count})</span>
+                    ✨ Xem tất cả bánh
                   </Link>
-                ))}
-              </div>
-            )}
-          </div>
-        </nav>
+                  <div style={{ height: '1px', backgroundColor: '#F3EDE8', margin: '4px 0' }} />
+                  {CATEGORIES_DATA.map(cat => (
+                    <Link
+                      key={cat.id || cat.slug}
+                      to={`/categories/${cat.slug}`}
+                      onClick={() => setIsDropdownOpen(false)}
+                      style={{
+                        padding: '0.55rem 0.85rem',
+                        borderRadius: '8px',
+                        textDecoration: 'none',
+                        color: '#4A2818',
+                        fontSize: '0.9rem',
+                        fontWeight: '500',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        transition: 'background-color 0.15s'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#FDFBF7'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                    >
+                      <span>{cat.name}</span>
+                      <span style={{ fontSize: '0.75rem', color: '#A89990' }}>({cat.count})</span>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          </nav>
+        )}
 
         {/* Right Action: Cart Button & Auth */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          {/* Nút Giỏ Hàng với Badge số lượng màu đỏ */}
-          <button
-            onClick={() => setIsCartOpen(true)}
-            title="Xem giỏ hàng"
-            style={{
-              width: '40px',
-              height: '40px',
-              borderRadius: '8px',
-              backgroundColor: '#5C2C16',
-              border: 'none',
-              color: '#FFFFFF',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              position: 'relative',
-              transition: 'transform 0.15s, background-color 0.15s'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#451A03'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#5C2C16'}
-          >
-            <ShoppingBag size={18} />
-            {cartCount > 0 && (
-              <span style={{
-                position: 'absolute',
-                top: '-4px',
-                right: '-4px',
-                backgroundColor: '#DC2626',
+          {/* Nút Giỏ Hàng - Ẩn khi là Admin */}
+          {user?.role !== 'admin' && (
+            <button
+              onClick={() => setIsCartOpen(true)}
+              title="Xem giỏ hàng"
+              style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '8px',
+                backgroundColor: '#5C2C16',
+                border: 'none',
                 color: '#FFFFFF',
-                fontSize: '0.7rem',
-                fontWeight: '800',
-                minWidth: '18px',
-                height: '18px',
-                borderRadius: '9999px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                padding: '0 4px',
-                border: '2px solid #FFFFFF',
-                boxShadow: '0 2px 5px rgba(220, 38, 38, 0.4)'
-              }}>
-                {cartCount > 99 ? '99+' : cartCount}
-              </span>
-            )}
-          </button>
-
-          {/* User Auth Info / Nút Đăng nhập - feat/ho-so-va-lich-su-don(08) */}
-          {isAuthenticated ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Link
-                to="/profile"
-                title="Xem hồ sơ cá nhân & lịch sử đơn hàng"
-                style={{
+                cursor: 'pointer',
+                position: 'relative',
+                transition: 'transform 0.15s, background-color 0.15s'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#451A03'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#5C2C16'}
+            >
+              <ShoppingBag size={18} />
+              {cartCount > 0 && (
+                <span style={{
+                  position: 'absolute',
+                  top: '-4px',
+                  right: '-4px',
+                  backgroundColor: '#DC2626',
+                  color: '#FFFFFF',
+                  fontSize: '0.7rem',
+                  fontWeight: '800',
+                  minWidth: '18px',
+                  height: '18px',
+                  borderRadius: '9999px',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '0.35rem',
-                  textDecoration: 'none',
-                  fontSize: '0.9rem',
-                  fontWeight: '600',
-                  color: '#451A03',
-                  padding: '0.35rem 0.6rem',
-                  borderRadius: '8px',
-                  backgroundColor: location.pathname === '/profile' ? '#F3EDE8' : 'transparent',
-                  transition: 'background-color 0.15s'
-                }}
-              >
-                <User size={16} />
-                <span>{user?.full_name || 'Khách hàng'}</span>
-              </Link>
+                  justifyContent: 'center',
+                  padding: '0 4px',
+                  border: '2px solid #FFFFFF',
+                  boxShadow: '0 2px 5px rgba(220, 38, 38, 0.4)'
+                }}>
+                  {cartCount > 99 ? '99+' : cartCount}
+                </span>
+              )}
+            </button>
+          )}
+
+          {/* User Auth Info / Nút Đăng nhập - feat/ho-so-va-lich-su-don(08) - feat/admin-dashboard(12) */}
+          {isAuthenticated ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              {user?.role === 'admin' ? (
+                /* Admin: Chỉ cần nút Trang Admin, không cần hồ sơ cá nhân */
+                <Link
+                  to="/admin"
+                  title="Trang Quản trị viên"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
+                    textDecoration: 'none',
+                    fontSize: '0.85rem',
+                    fontWeight: '700',
+                    color: '#FFFFFF',
+                    backgroundColor: '#DC2626',
+                    padding: '0.4rem 0.8rem',
+                    borderRadius: '8px',
+                    boxShadow: '0 2px 6px rgba(220, 38, 38, 0.25)',
+                    transition: 'opacity 0.15s'
+                  }}
+                >
+                  <ShieldCheck size={16} />
+                  <span>Trang Admin</span>
+                </Link>
+              ) : (
+                /* Khách hàng thường: Liên kết tới Hồ sơ cá nhân */
+                <Link
+                  to="/profile"
+                  title="Xem hồ sơ cá nhân & lịch sử đơn hàng"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
+                    textDecoration: 'none',
+                    fontSize: '0.9rem',
+                    fontWeight: '600',
+                    color: '#451A03',
+                    padding: '0.35rem 0.6rem',
+                    borderRadius: '8px',
+                    backgroundColor: location.pathname === '/profile' ? '#F3EDE8' : 'transparent',
+                    transition: 'background-color 0.15s'
+                  }}
+                >
+                  <User size={16} />
+                  <span>{user?.full_name || 'Khách hàng'}</span>
+                </Link>
+              )}
               <button
                 onClick={handleLogout}
                 title="Đăng xuất"

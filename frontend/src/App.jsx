@@ -1,12 +1,13 @@
-//ref(00->11)
+//ref(00->12)
 //feat/ho-so-va-lich-su-don(08)
 //feat/heroslide(09)
 //feat/blog-va-tin-tuc(10)
 //feat/footer(11)
+//feat/admin-dashboard(12)
 
 import React, { useState } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -23,7 +24,47 @@ import ProfilePage from './pages/Client/ProfilePage';
 import ProtectedRoute from './components/ProtectedRoute';
 import RegisterPage from './pages/Auth/RegisterPage';
 import LoginPage from './pages/Auth/LoginPage';
+import UnauthorizedPage from './pages/Auth/UnauthorizedPage';
+import AdminDashboard from './pages/Admin/AdminDashboard';
 
+
+// Điều hướng Trang chủ: Khách xem giao diện bán bánh, Admin chuyển thẳng vào Dashboard
+function HomeRoute({ selectedProduct, setSelectedProduct }) {
+  const { user } = useAuth();
+  if (user?.role === 'admin') {
+    return <Navigate to="/admin" replace />;
+  }
+  return (
+    <div>
+      {/* Khối 1: Hero Banner Slider & Ticker Marquee */}
+      <HeroSlider />
+
+      {/* Khối 2: Danh mục sản phẩm */}
+      <CategorySection />
+
+      {/* Khối 3: Sản phẩm nổi bật */}
+      <FeaturedProducts onQuickView={(p) => setSelectedProduct(p)} />
+
+      {/* Khối 4: Blog & Tin tức ưu đãi lễ hội */}
+      <BlogSection />
+
+      {/* Modal xem nhanh sản phẩm khi xem danh mục/nổi bật */}
+      {selectedProduct && (
+        <ProductModal
+          product={selectedProduct}
+          onClose={() => setSelectedProduct(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+// Chân trang toàn cục: Ẩn đối với Quản trị viên
+function AppFooter() {
+  const { user } = useAuth();
+  if (user?.role === 'admin') return null;
+  return <Footer />;
+}
 
 export default function App() {
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -41,31 +82,14 @@ export default function App() {
 
             <main style={{ flex: 1 }}>
               <Routes>
-                {/* Trang chủ với đầy đủ các khối trình diễn - feat/blog-va-tin-tuc(10) */}
+                {/* Trang chủ - Điều hướng thông minh theo role */}
                 <Route
                   path="/"
                   element={
-                    <div>
-                      {/* Khối 1: Hero Banner Slider & Ticker Marquee */}
-                      <HeroSlider />
-
-                      {/* Khối 2: Danh mục sản phẩm */}
-                      <CategorySection />
-
-                      {/* Khối 3: Sản phẩm nổi bật */}
-                      <FeaturedProducts onQuickView={(p) => setSelectedProduct(p)} />
-
-                      {/* Khối 4: Blog & Tin tức ưu đãi lễ hội */}
-                      <BlogSection />
-
-                      {/* Modal xem nhanh sản phẩm khi xem danh mục/nổi bật */}
-                      {selectedProduct && (
-                        <ProductModal
-                          product={selectedProduct}
-                          onClose={() => setSelectedProduct(null)}
-                        />
-                      )}
-                    </div>
+                    <HomeRoute
+                      selectedProduct={selectedProduct}
+                      setSelectedProduct={setSelectedProduct}
+                    />
                   }
                 />
 
@@ -97,26 +121,36 @@ export default function App() {
                   }
                 />
 
+                {/* Phân hệ Quản trị Admin (Yêu cầu quyền Admin) - feat/admin-dashboard(12) */}
+                <Route
+                  path="/admin"
+                  element={
+                    <ProtectedRoute requiredRole="admin">
+                      <AdminDashboard />
+                    </ProtectedRoute>
+                  }
+                />
+
                 {/* Luồng xác thực người dùng (Auth Flow từ Commit 01 - 03) */}
                 <Route path="/register" element={<RegisterPage />} />
                 <Route path="/login" element={<LoginPage />} />
+                <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
-                {/* Tuyến đường mặc định - feat/heroslide(09) */}
+                {/* Tuyến đường mặc định */}
                 <Route
                   path="*"
                   element={
-                    <div>
-                      <HeroSlider />
-                      <CategorySection />
-                      <FeaturedProducts onQuickView={(p) => setSelectedProduct(p)} />
-                    </div>
+                    <HomeRoute
+                      selectedProduct={selectedProduct}
+                      setSelectedProduct={setSelectedProduct}
+                    />
                   }
                 />
               </Routes>
             </main>
 
-            {/* Chân trang toàn cục Yuu Cake - feat/footer(11) */}
-            <Footer />
+            {/* Chân trang toàn cục Yuu Cake (chỉ hiện cho khách, ẩn đối với admin) */}
+            <AppFooter />
           </div>
         </BrowserRouter>
       </CartProvider>
