@@ -1,4 +1,5 @@
 //feat/quan-ly-banh-danh-sach(14)
+//feat/quan-ly-banh-them-moi(15)
 
 import { fetchClient } from './fetchClient';
 
@@ -20,5 +21,17 @@ export async function getAdminProducts(params = {}) {
   const queryString = query.toString() ? `?${query.toString()}` : '';
   return await fetchClient(`/products/admin-list${queryString}`, {
     method: 'GET',
+  });
+}
+
+/**
+ * [ADMIN] Thêm bánh mới kèm tải ảnh đại diện lên máy chủ
+ * @param {FormData} formData - Dữ liệu dạng FormData chứa name, price, category_id, description, image (file)
+ * @returns {Promise<Object>} Thông tin sản phẩm vừa tạo
+ */
+export async function createProduct(formData) {
+  return await fetchClient('/products', {
+    method: 'POST',
+    body: formData,
   });
 }

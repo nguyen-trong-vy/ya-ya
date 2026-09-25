@@ -1,10 +1,12 @@
 //feat/quan-ly-banh-danh-sach(14)
+//feat/quan-ly-banh-them-moi(15)
 
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { getCategories } from '../../api/catalogApi';
-import { getAdminProducts } from '../../api/productApi';
+import { getAdminProducts, createProduct } from '../../api/productApi';
+import ProductFormModal from '../../components/Admin/ProductFormModal';
 import {
   Package,
   Search,
@@ -14,7 +16,9 @@ import {
   ChevronLeft,
   ChevronRight,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  Plus,
+  CheckCircle2
 } from 'lucide-react';
 
 export default function ProductManagePage() {
@@ -35,6 +39,10 @@ export default function ProductManagePage() {
   // Bộ lọc
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
+
+  // Quản lý Modal thêm bánh mới
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
 
   // Nạp danh mục từ Supabase
   useEffect(() => {
@@ -81,6 +89,19 @@ export default function ProductManagePage() {
     e.preventDefault();
     setPage(1);
     fetchProducts();
+  };
+
+  // Xử lý tạo bánh mới
+  const handleCreateProduct = async (formData) => {
+    try {
+      await createProduct(formData);
+      setToastMessage('Thêm bánh mới thành công!');
+      setTimeout(() => setToastMessage(''), 3500);
+      setPage(1);
+      fetchProducts();
+    } catch (err) {
+      throw err;
+    }
   };
 
   return (
@@ -147,6 +168,28 @@ export default function ProductManagePage() {
             >
               <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />
               <span>Làm mới</span>
+            </button>
+
+            <button
+              onClick={() => setIsCreateModalOpen(true)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.45rem',
+                backgroundColor: '#DC2626',
+                color: '#FFFFFF',
+                border: 'none',
+                borderRadius: '12px',
+                padding: '0.65rem 1.25rem',
+                fontWeight: '700',
+                fontSize: '0.88rem',
+                cursor: 'pointer',
+                boxShadow: '0 3px 10px rgba(220, 38, 38, 0.25)',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <Plus size={18} />
+              <span>Thêm Bánh Mới</span>
             </button>
           </div>
         </div>
@@ -498,6 +541,36 @@ export default function ProductManagePage() {
           </div>
         )}
       </div>
+
+      {/* Thông báo toast thành công */}
+      {toastMessage && (
+        <div style={{
+          position: 'fixed',
+          top: '24px',
+          right: '24px',
+          backgroundColor: '#10B981',
+          color: '#FFFFFF',
+          padding: '0.85rem 1.25rem',
+          borderRadius: '12px',
+          boxShadow: '0 10px 25px -5px rgba(16, 185, 129, 0.4)',
+          zIndex: 2000,
+          fontWeight: '600',
+          fontSize: '0.92rem',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5rem'
+        }}>
+          <CheckCircle2 size={18} />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
+      {/* Modal Thêm Bánh Mới */}
+      <ProductFormModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSubmitSuccess={handleCreateProduct}
+      />
     </div>
   );
 }
