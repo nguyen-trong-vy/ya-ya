@@ -5,6 +5,7 @@
 //feat/footer(11)
 //feat/admin-dashboard(12)
 //feat/quan-ly-don-hang(13)
+//feat/quan-ly-banh-danh-sach(14)
 
 import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
@@ -28,6 +29,7 @@ import LoginPage from './pages/Auth/LoginPage';
 import UnauthorizedPage from './pages/Auth/UnauthorizedPage';
 import AdminDashboard from './pages/Admin/AdminDashboard';
 import OrderManagePage from './pages/Admin/OrderManagePage';
+import ProductManagePage from './pages/Admin/ProductManagePage';
 
 
 // Điều hướng Trang chủ: Khách xem giao diện bán bánh, Admin chuyển thẳng vào Dashboard
@@ -139,6 +141,16 @@ export default function App() {
                   element={
                     <ProtectedRoute requiredRole="admin">
                       <OrderManagePage />
+                    </ProtectedRoute>
+                  }
+                />
+
+                {/* Quản lý thực đơn bánh (Yêu cầu quyền Admin) - feat/quan-ly-banh-danh-sach(14) */}
+                <Route
+                  path="/admin/products"
+                  element={
+                    <ProtectedRoute requiredRole="admin">
+                      <ProductManagePage />
                     </ProtectedRoute>
                   }
                 />
