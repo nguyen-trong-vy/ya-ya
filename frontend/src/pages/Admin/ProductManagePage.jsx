@@ -1,12 +1,13 @@
 //feat/quan-ly-banh-danh-sach(14)
 //feat/quan-ly-banh-them-moi(15)
+//feat/quan-ly-banh-chinh-sua(16)
 //feat/quan-ly-banh-xoa-mem(17)
 
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { getCategories } from '../../api/catalogApi';
-import { getAdminProducts, createProduct, deleteProduct } from '../../api/productApi';
+import { getAdminProducts, createProduct, updateProduct, deleteProduct } from '../../api/productApi';
 import ProductFormModal from '../../components/Admin/ProductFormModal';
 import DeleteConfirmModal from '../../components/Admin/DeleteConfirmModal';
 import {
@@ -21,7 +22,8 @@ import {
   AlertCircle,
   Plus,
   CheckCircle2,
-  Trash2
+  Trash2,
+  Edit2
 } from 'lucide-react';
 
 export default function ProductManagePage() {
@@ -43,8 +45,9 @@ export default function ProductManagePage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
 
-  // Quản lý Modal thêm bánh mới
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  // Quản lý Modal thêm & sửa bánh
+  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
   const [toastMessage, setToastMessage] = useState('');
 
   // Quản lý Xóa mềm bánh
@@ -98,13 +101,37 @@ export default function ProductManagePage() {
     fetchProducts();
   };
 
-  // Xử lý tạo bánh mới
-  const handleCreateProduct = async (formData) => {
+  // Mở modal thêm bánh mới
+  const handleOpenCreateModal = () => {
+    setEditingProduct(null);
+    setIsFormModalOpen(true);
+  };
+
+  // Mở modal chỉnh sửa bánh
+  const handleOpenEditModal = (product) => {
+    setEditingProduct(product);
+    setIsFormModalOpen(true);
+  };
+
+  // Đóng modal biểu mẫu
+  const handleCloseFormModal = () => {
+    setIsFormModalOpen(false);
+    setEditingProduct(null);
+  };
+
+  // Xử lý lưu bánh (thêm mới hoặc cập nhật)
+  const handleSaveProduct = async (formData, productId) => {
     try {
-      await createProduct(formData);
-      setToastMessage('Thêm bánh mới thành công!');
+      if (editingProduct && productId) {
+        await updateProduct(productId, formData);
+        setToastMessage(`Đã cập nhật bánh "${editingProduct.name}" thành công!`);
+      } else {
+        await createProduct(formData);
+        setToastMessage('Thêm bánh mới vào thực đơn thành công!');
+        setPage(1);
+      }
       setTimeout(() => setToastMessage(''), 3500);
-      setPage(1);
+      handleCloseFormModal();
       fetchProducts();
     } catch (err) {
       throw err;
@@ -202,7 +229,7 @@ export default function ProductManagePage() {
             </button>
 
             <button
-              onClick={() => setIsCreateModalOpen(true)}
+              onClick={handleOpenCreateModal}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -485,7 +512,38 @@ export default function ProductManagePage() {
                         </td>
 
                         {/* Hành động */}
-                        <td style={{ padding: '0.85rem 1.25rem', verticalAlign: 'middle', textAlign: 'center' }}>
+                        <td style={{ padding: '0.85rem 1.25rem', verticalAlign: 'middle', textAlign: 'center', whiteSpace: 'nowrap' }}>
+                          <button
+                            onClick={() => handleOpenEditModal(p)}
+                            title="Chỉnh sửa thông tin bánh"
+                            style={{
+                              backgroundColor: '#EFF6FF',
+                              color: '#2563EB',
+                              border: '1px solid #BFDBFE',
+                              padding: '0.45rem 0.75rem',
+                              borderRadius: '8px',
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '0.35rem',
+                              fontSize: '0.8125rem',
+                              fontWeight: '700',
+                              marginRight: '0.5rem',
+                              transition: 'all 0.15s ease'
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.backgroundColor = '#DBEAFE';
+                              e.currentTarget.style.borderColor = '#93C5FD';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.backgroundColor = '#EFF6FF';
+                              e.currentTarget.style.borderColor = '#BFDBFE';
+                            }}
+                          >
+                            <Edit2 size={14} />
+                            <span>Sửa</span>
+                          </button>
+
                           <button
                             onClick={() => handleOpenDeleteModal(p)}
                             title="Xóa món bánh này"
@@ -630,11 +688,12 @@ export default function ProductManagePage() {
         </div>
       )}
 
-      {/* Modal Thêm Bánh Mới */}
+      {/* Modal Thêm & Chỉnh Sửa Bánh */}
       <ProductFormModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        onSubmitSuccess={handleCreateProduct}
+        isOpen={isFormModalOpen}
+        onClose={handleCloseFormModal}
+        onSubmitSuccess={handleSaveProduct}
+        initialData={editingProduct}
       />
 
       {/* Modal Xác Nhận Xóa Mềm */}

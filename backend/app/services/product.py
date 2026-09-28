@@ -1,6 +1,7 @@
 #feat/SPNB-CTSP(04)
 #feat/quan-ly-banh-danh-sach(14)
 #feat/quan-ly-banh-them-moi(15)
+#feat/quan-ly-banh-chinh-sua(16)
 #feat/quan-ly-banh-xoa-mem(17)
 
 import re
@@ -350,6 +351,114 @@ async def create_product_service(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Lỗi khi thêm bánh mới: {str(e)}"
+        )
+
+
+#feat/quan-ly-banh-chinh-sua(16)
+async def update_product_service(
+    product_id: str,
+    name: str,
+    price: float,
+    category_id: str,
+    description: Optional[str] = None,
+    file: Optional[UploadFile] = None
+) -> dict:
+    """
+    Cập nhật thông tin sản phẩm bánh kem:
+    - Kiểm tra bánh có tồn tại và chưa bị xóa mềm (is_deleted = False).
+    - Tạo lại slug chuẩn SEO nếu tên bánh thay đổi.
+    - Upload ảnh mới nếu người dùng chọn file, ngược lại giữ nguyên ảnh cũ.
+    - Cập nhật bảng products trong Supabase.
+    """
+    supabase = get_supabase()
+
+    # 1. Kiểm tra sản phẩm có tồn tại không
+    existing_res = supabase.table("products").select("*").eq("id", product_id).eq("is_deleted", False).execute()
+    if not existing_res.data or len(existing_res.data) == 0:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Không tìm thấy sản phẩm bánh kem hoặc sản phẩm đã bị xóa."
+        )
+
+    current_product = existing_res.data[0]
+
+    # 2. Validate dữ liệu đầu vào
+    clean_name = name.strip()
+    if not clean_name:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Tên bánh kem không được để trống."
+        )
+
+    if price <= 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Đơn giá sản phẩm phải lớn hơn 0 VNĐ."
+        )
+
+    # 3. Xử lý slug: Nếu đổi tên thì sinh slug mới
+    new_slug = current_product.get("slug")
+    if clean_name != current_product.get("name"):
+        base_slug = slugify_vietnamese(clean_name)
+        if not base_slug:
+            base_slug = f"banh-kem-{uuid.uuid4().hex[:6]}"
+        
+        new_slug = base_slug
+        # Kiểm tra xem slug có trùng với sản phẩm KHÁC không
+        slug_check = supabase.table("products").select("id").eq("slug", new_slug).neq("id", product_id).execute()
+        if slug_check.data and len(slug_check.data) > 0:
+            new_slug = f"{base_slug}-{uuid.uuid4().hex[:6]}"
+
+    # 4. Xử lý ảnh đại diện: Nếu có file mới thì upload, nếu không thì giữ nguyên URL cũ
+    image_url = current_product.get("image_url")
+    if file and file.filename:
+        image_url = await upload_cake_image(file)
+
+    # 5. Cập nhật vào CSDL Supabase
+    update_data = {
+        "name": clean_name,
+        "slug": new_slug,
+        "price": price,
+        "category_id": category_id,
+        "description": description.strip() if description else "",
+        "image_url": image_url
+    }
+
+    try:
+        update_res = supabase.table("products").update(update_data).eq("id", product_id).execute()
+        if not update_res.data:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Lỗi cập nhật sản phẩm trên CSDL Supabase."
+            )
+
+        updated_row = update_res.data[0]
+
+        # 6. Lấy kèm thông tin tên danh mục
+        cat_res = supabase.table("categories").select("name, slug").eq("id", category_id).execute()
+        cat_data = cat_res.data[0] if cat_res.data else {}
+
+        return {
+            "id": str(updated_row["id"]),
+            "category_id": str(updated_row.get("category_id")),
+            "category_name": cat_data.get("name"),
+            "category_slug": cat_data.get("slug"),
+            "name": updated_row["name"],
+            "slug": updated_row["slug"],
+            "description": updated_row.get("description"),
+            "price": float(updated_row.get("price") or 0),
+            "image_url": updated_row.get("image_url"),
+            "is_deleted": updated_row.get("is_deleted", False),
+            "created_at": str(updated_row.get("created_at")) if updated_row.get("created_at") else None
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[ERROR update_product_service] {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Lỗi khi cập nhật sản phẩm: {str(e)}"
         )
 
 

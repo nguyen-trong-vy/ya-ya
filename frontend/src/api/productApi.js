@@ -1,5 +1,6 @@
 //feat/quan-ly-banh-danh-sach(14)
 //feat/quan-ly-banh-them-moi(15)
+//feat/quan-ly-banh-chinh-sua(16)
 //feat/quan-ly-banh-xoa-mem(17)
 
 import { fetchClient } from './fetchClient';
@@ -33,6 +34,19 @@ export async function getAdminProducts(params = {}) {
 export async function createProduct(formData) {
   return await fetchClient('/products', {
     method: 'POST',
+    body: formData,
+  });
+}
+
+/**
+ * [ADMIN] Chỉnh sửa thông tin bánh kem và cập nhật ảnh đại diện mới
+ * @param {string} productId - ID bánh kem cần cập nhật
+ * @param {FormData} formData - Dữ liệu dạng FormData chứa name, price, category_id, description, image (optional)
+ * @returns {Promise<Object>} Thông tin sản phẩm sau khi cập nhật
+ */
+export async function updateProduct(productId, formData) {
+  return await fetchClient(`/products/${productId}`, {
+    method: 'PUT',
     body: formData,
   });
 }

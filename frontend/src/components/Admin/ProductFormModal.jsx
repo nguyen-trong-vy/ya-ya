@@ -1,10 +1,18 @@
 //feat/quan-ly-banh-them-moi(15)
+//feat/quan-ly-banh-chinh-sua(16)
 
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Upload, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { getCategories } from '../../api/catalogApi';
 
-export default function ProductFormModal({ isOpen, onClose, onSubmitSuccess }) {
+export default function ProductFormModal({
+  isOpen,
+  onClose,
+  onSubmitSuccess,
+  initialData = null // Nếu có initialData => Chế độ Chỉnh sửa, ngược lại => Thêm mới
+}) {
+  const isEditMode = Boolean(initialData);
+
   const [categories, setCategories] = useState([]);
   const [loadingCategories, setLoadingCategories] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -21,14 +29,14 @@ export default function ProductFormModal({ isOpen, onClose, onSubmitSuccess }) {
   const [imagePreview, setImagePreview] = useState('');
   const fileInputRef = useRef(null);
 
-  // Tải danh sách danh mục để đổ vào dropdown
+  // Tải danh sách danh mục và đổ dữ liệu ban đầu
   useEffect(() => {
     if (isOpen) {
       setLoadingCategories(true);
       getCategories()
         .then(data => {
           setCategories(data || []);
-          if (data && data.length > 0 && !categoryId) {
+          if (!isEditMode && data && data.length > 0 && !categoryId) {
             setCategoryId(data[0].id);
           }
         })
@@ -39,15 +47,25 @@ export default function ProductFormModal({ isOpen, onClose, onSubmitSuccess }) {
           setLoadingCategories(false);
         });
 
-      // Reset form khi mở modal
-      setName('');
-      setPrice('');
-      setDescription('');
-      setSelectedFile(null);
-      setImagePreview('');
+      // Nếu đang chỉnh sửa: nạp giá trị cũ của bánh
+      if (initialData) {
+        setName(initialData.name || '');
+        setPrice(initialData.price !== undefined ? initialData.price.toString() : '');
+        setCategoryId(initialData.category_id || '');
+        setDescription(initialData.description || '');
+        setImagePreview(initialData.image_url || '');
+        setSelectedFile(null);
+      } else {
+        // Reset form khi thêm mới
+        setName('');
+        setPrice('');
+        setDescription('');
+        setSelectedFile(null);
+        setImagePreview('');
+      }
       setErrorMessage('');
     }
-  }, [isOpen]);
+  }, [isOpen, initialData]);
 
   if (!isOpen) return null;
 
@@ -76,10 +94,14 @@ export default function ProductFormModal({ isOpen, onClose, onSubmitSuccess }) {
     setImagePreview(previewUrl);
   };
 
-  // Hủy ảnh đã chọn
+  // Hủy ảnh đã chọn (nếu ở chế độ sửa thì khôi phục ảnh cũ)
   const handleRemoveImage = () => {
     setSelectedFile(null);
-    setImagePreview('');
+    if (isEditMode && initialData?.image_url) {
+      setImagePreview(initialData.image_url);
+    } else {
+      setImagePreview('');
+    }
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -115,14 +137,15 @@ export default function ProductFormModal({ isOpen, onClose, onSubmitSuccess }) {
       if (description.trim()) {
         formData.append('description', description.trim());
       }
+      // Chỉ gửi file ảnh nếu người dùng chọn ảnh mới
       if (selectedFile) {
         formData.append('image', selectedFile);
       }
 
-      await onSubmitSuccess(formData);
+      await onSubmitSuccess(formData, initialData?.id);
       onClose();
     } catch (err) {
-      setErrorMessage(err.message || 'Không thể lưu bánh mới. Vui lòng thử lại!');
+      setErrorMessage(err.message || 'Không thể lưu thông tin bánh. Vui lòng thử lại!');
     } finally {
       setIsSubmitting(false);
     }
@@ -164,10 +187,10 @@ export default function ProductFormModal({ isOpen, onClose, onSubmitSuccess }) {
         }}>
           <div>
             <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#1f2937', margin: 0 }}>
-              Thêm Bánh Mới Vào Thực Đơn
+              {isEditMode ? 'Chỉnh Sửa Thông Tin Bánh' : 'Thêm Bánh Mới Vào Thực Đơn'}
             </h3>
             <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.875rem', color: '#6b7280' }}>
-              Điền thông tin và tải ảnh bánh lên hệ thống tiệm Yuu Cake
+              {isEditMode ? 'Cập nhật giá bán, tên gọi, danh mục và hình ảnh bánh' : 'Điền thông tin và tải ảnh bánh lên hệ thống tiệm Yuu Cake'}
             </p>
           </div>
           <button
@@ -312,7 +335,7 @@ export default function ProductFormModal({ isOpen, onClose, onSubmitSuccess }) {
           {/* Khu vực Upload Ảnh Đại Diện */}
           <div>
             <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#374151', marginBottom: '0.375rem' }}>
-              Hình ảnh đại diện bánh
+              Hình ảnh đại diện {isEditMode && <span style={{ fontWeight: 400, color: '#6b7280' }}>(Bấm để thay đổi)</span>}
             </label>
             <input
               type="file"
@@ -346,45 +369,76 @@ export default function ProductFormModal({ isOpen, onClose, onSubmitSuccess }) {
                 </p>
               </div>
             ) : (
-              <div style={{
-                position: 'relative',
-                display: 'inline-block',
-                borderRadius: '0.75rem',
-                overflow: 'hidden',
-                border: '1px solid #e5e7eb'
-              }}>
-                <img
-                  src={imagePreview}
-                  alt="Xem trước bánh mới"
-                  style={{
-                    width: '160px',
-                    height: '140px',
-                    objectFit: 'cover',
-                    display: 'block'
-                  }}
-                />
-                <button
-                  type="button"
-                  onClick={handleRemoveImage}
-                  style={{
-                    position: 'absolute',
-                    top: '0.375rem',
-                    right: '0.375rem',
-                    backgroundColor: 'rgba(0, 0, 0, 0.65)',
-                    color: '#ffffff',
-                    border: 'none',
-                    borderRadius: '50%',
-                    width: '26px',
-                    height: '26px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    cursor: 'pointer'
-                  }}
-                  title="Gỡ ảnh này"
-                >
-                  <X size={14} />
-                </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <div style={{
+                  position: 'relative',
+                  display: 'inline-block',
+                  borderRadius: '0.75rem',
+                  overflow: 'hidden',
+                  border: '1px solid #e5e7eb'
+                }}>
+                  <img
+                    src={imagePreview}
+                    alt="Xem trước ảnh bánh"
+                    style={{
+                      width: '140px',
+                      height: '120px',
+                      objectFit: 'cover',
+                      display: 'block'
+                    }}
+                  />
+                  {!isEditMode && (
+                    <button
+                      type="button"
+                      onClick={handleRemoveImage}
+                      style={{
+                        position: 'absolute',
+                        top: '0.375rem',
+                        right: '0.375rem',
+                        backgroundColor: 'rgba(0, 0, 0, 0.65)',
+                        color: '#ffffff',
+                        border: 'none',
+                        borderRadius: '50%',
+                        width: '26px',
+                        height: '26px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer'
+                      }}
+                      title="Gỡ ảnh này"
+                    >
+                      <X size={14} />
+                    </button>
+                  )}
+                </div>
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    style={{
+                      padding: '0.5rem 1rem',
+                      backgroundColor: '#f3f4f6',
+                      color: '#374151',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '0.5rem',
+                      fontSize: '0.8125rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.375rem'
+                    }}
+                  >
+                    <Upload size={14} />
+                    <span>Tải ảnh mới</span>
+                  </button>
+                  {selectedFile && (
+                    <p style={{ margin: '0.375rem 0 0 0', fontSize: '0.75rem', color: '#10b981' }}>
+                      Đã chọn ảnh mới: {selectedFile.name}
+                    </p>
+                  )}
+                </div>
               </div>
             )}
           </div>
@@ -434,10 +488,10 @@ export default function ProductFormModal({ isOpen, onClose, onSubmitSuccess }) {
               {isSubmitting ? (
                 <>
                   <Loader2 size={16} className="animate-spin" />
-                  <span>Đang tải lên...</span>
+                  <span>Đang lưu...</span>
                 </>
               ) : (
-                <span>Lưu Bánh Mới</span>
+                <span>{isEditMode ? 'Cập Nhật Bánh' : 'Lưu Bánh Mới'}</span>
               )}
             </button>
           </div>
