@@ -10,6 +10,7 @@ from fastapi import APIRouter, Depends, Query, Form, File, UploadFile, status
 from app.schemas.product import ProductResponse, ProductPaginatedResponse
 from app.services.product import (
     get_all_products,
+    get_featured_best_seller_products,
     get_admin_products_paginated,
     create_product_service,
     update_product_service,
@@ -18,6 +19,20 @@ from app.services.product import (
 from app.dependencies import require_admin
 
 router = APIRouter(prefix="/api/products", tags=["Sản phẩm bánh (Products)"])
+
+#feat/SPNB-CTSP(04) - Cải tiến: Sản phẩm nổi bật bán chạy nhất
+@router.get(
+    "/featured",
+    response_model=List[ProductResponse],
+    status_code=status.HTTP_200_OK,
+    summary="Lấy danh sách sản phẩm nổi bật bán chạy nhất (Best-sellers)",
+    description="Thống kê các sản phẩm có tổng lượt bán cao nhất từ bảng order_items để hiển thị trên Trang chủ."
+)
+async def list_featured_products(
+    limit: int = Query(4, ge=1, le=12, description="Số lượng sản phẩm nổi bật cần lấy")
+):
+    return await get_featured_best_seller_products(limit=limit)
+
 
 @router.get(
     "",

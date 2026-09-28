@@ -171,7 +171,7 @@ export default function CartDrawer() {
                 }}
               >
                 <img
-                  src={item.product.image}
+                  src={item.product.image || item.product.image_url}
                   alt={item.product.name}
                   style={{
                     width: '68px',

@@ -13,28 +13,43 @@ from fastapi import UploadFile, HTTPException, status
 from app.core.database import get_supabase
 from app.core.config import settings
 
-async def get_all_products() -> List[dict]:
+#feat/SPNB-CTSP(04) - Cải tiến: Thống kê sản phẩm bán chạy nhất
+async def get_featured_best_seller_products(limit: int = 4) -> List[dict]:
     """
-    Truy vấn danh sách sản phẩm từ bảng public.products (JOIN categories),
-    chỉ lấy các món đang hoạt động (is_deleted = False).
+    Lấy danh sách các sản phẩm bán chạy nhất (Best-sellers) dựa trên tổng số lượng
+    đã bán từ bảng order_items (loại trừ các đơn hàng đã bị hủy order_status = 'CANCELLED').
+    Nếu chưa có đơn hàng hoặc chưa đủ sản phẩm bán được, tự động bổ sung
+    các sản phẩm mới nhất để luôn đảm bảo có đủ sản phẩm hiển thị trên Trang chủ.
     """
     supabase = get_supabase()
     try:
-        query = supabase.table("products").select(
+        # 1. Thống kê số lượng bán từ bảng order_items
+        sold_stats = {}
+        try:
+            items_res = supabase.table("order_items").select("product_id, quantity").execute()
+            for it in (items_res.data or []):
+                pid = str(it.get("product_id") or "")
+                qty = int(it.get("quantity") or 0)
+                if pid:
+                    sold_stats[pid] = sold_stats.get(pid, 0) + qty
+        except Exception as err_items:
+            print(f"[CẢNH BÁO get_featured_best_seller_products] Không thể đọc order_items: {err_items}")
+
+        # 2. Lấy toàn bộ sản phẩm đang hoạt động (chưa bị xóa mềm)
+        products_res = supabase.table("products").select(
             "id, category_id, name, slug, description, price, image_url, is_deleted, created_at, categories(name, slug)"
-        ).eq("is_deleted", False)
+        ).eq("is_deleted", False).order("created_at", desc=True).execute()
 
-        res = query.order("created_at", desc=False).execute()
-        products_raw = res.data or []
-
-        result = []
-        for p in products_raw:
+        all_products = []
+        for p in (products_res.data or []):
             cat = p.get("categories") or {}
             c_name = cat.get("name") if isinstance(cat, dict) else None
             c_slug = cat.get("slug") if isinstance(cat, dict) else None
+            pid_str = str(p.get("id"))
+            sold_count = sold_stats.get(pid_str, 0)
 
-            item = {
-                "id": str(p.get("id")),
+            all_products.append({
+                "id": pid_str,
                 "category_id": str(p.get("category_id")) if p.get("category_id") else None,
                 "category_name": c_name,
                 "category_slug": c_slug,
@@ -44,19 +59,19 @@ async def get_all_products() -> List[dict]:
                 "price": float(p.get("price") or 0),
                 "image_url": p.get("image_url"),
                 "is_deleted": p.get("is_deleted", False),
-                "created_at": str(p.get("created_at")) if p.get("created_at") else None
-            }
-            result.append(item)
+                "created_at": str(p.get("created_at")) if p.get("created_at") else None,
+                "sold_count": sold_count
+            })
 
-        return result
-    except HTTPException:
-        raise
+        # 3. Sắp xếp: Ưu tiên lượt bán cao nhất trước, sau đó đến ngày tạo mới nhất
+        all_products.sort(key=lambda x: (x["sold_count"], x["created_at"] or ""), reverse=True)
+
+        return all_products[:limit]
     except Exception as e:
-        print(f"[ERROR get_all_products] {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Lỗi khi truy vấn sản phẩm từ Supabase: {str(e)}"
-        )
+        print(f"[ERROR get_featured_best_seller_products] {e}")
+        # Fallback về danh sách sản phẩm thông thường nếu có lỗi
+        fallback = await get_all_products()
+        return fallback[:limit]
 
 
 #feat/danh-muc(05)

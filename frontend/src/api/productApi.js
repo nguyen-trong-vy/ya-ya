@@ -6,6 +6,14 @@
 import { fetchClient } from './fetchClient';
 
 /**
+ * Lấy danh sách sản phẩm nổi bật bán chạy nhất từ Backend FastAPI (Supabase)
+ * @param {number} limit - Số lượng sản phẩm cần lấy (mặc định 4)
+ */
+export async function getFeaturedProducts(limit = 4) {
+  return await fetchClient(`/products/featured?limit=${limit}`);
+}
+
+/**
  * Tính năng 5.1: Admin xem danh sách bánh có phân trang
  * @param {Object} params - { page?: number, limit?: number, category_id?: string, search?: string }
  */

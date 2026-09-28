@@ -74,8 +74,11 @@ export default function ProductModal({ product, onClose }) {
           borderRight: '1px solid #F3EDE8'
         }}>
           <img
-            src={product.image}
+            src={product.image || product.image_url}
             alt={product.name}
+            onError={(e) => {
+              e.target.src = '/images/sản phẩm nổi bật/banh sinh nhat.avif';
+            }}
             style={{
               maxWidth: '100%',
               maxHeight: '280px',

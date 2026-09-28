@@ -24,3 +24,11 @@ export async function getProducts(params = {}) {
 
   return await fetchClient(endpoint);
 }
+
+/**
+ * Lấy danh sách sản phẩm nổi bật bán chạy nhất từ Backend FastAPI (Supabase)
+ * @param {number} limit - Số lượng sản phẩm cần lấy (mặc định 4)
+ */
+export async function getFeaturedProducts(limit = 4) {
+  return await fetchClient(`/products/featured?limit=${limit}`);
+}

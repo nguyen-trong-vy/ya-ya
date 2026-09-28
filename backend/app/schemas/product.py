@@ -16,6 +16,7 @@ class ProductResponse(BaseModel):
     image_url: Optional[str] = None
     is_deleted: bool = False
     created_at: Optional[str] = None
+    sold_count: Optional[int] = 0
 
     class Config:
         from_attributes = True
