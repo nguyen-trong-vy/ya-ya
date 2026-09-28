@@ -1,5 +1,6 @@
 //feat/quan-ly-banh-danh-sach(14)
 //feat/quan-ly-banh-them-moi(15)
+//feat/quan-ly-banh-xoa-mem(17)
 
 import { fetchClient } from './fetchClient';
 
@@ -33,5 +34,16 @@ export async function createProduct(formData) {
   return await fetchClient('/products', {
     method: 'POST',
     body: formData,
+  });
+}
+
+/**
+ * [ADMIN] Xóa mềm sản phẩm bánh kem khỏi danh mục kinh doanh
+ * @param {string} productId - ID bánh kem cần xóa
+ * @returns {Promise<Object>} Thông báo xóa thành công
+ */
+export async function deleteProduct(productId) {
+  return await fetchClient(`/products/${productId}`, {
+    method: 'DELETE',
   });
 }

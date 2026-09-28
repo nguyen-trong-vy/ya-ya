@@ -1,12 +1,14 @@
 //feat/quan-ly-banh-danh-sach(14)
 //feat/quan-ly-banh-them-moi(15)
+//feat/quan-ly-banh-xoa-mem(17)
 
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { getCategories } from '../../api/catalogApi';
-import { getAdminProducts, createProduct } from '../../api/productApi';
+import { getAdminProducts, createProduct, deleteProduct } from '../../api/productApi';
 import ProductFormModal from '../../components/Admin/ProductFormModal';
+import DeleteConfirmModal from '../../components/Admin/DeleteConfirmModal';
 import {
   Package,
   Search,
@@ -18,7 +20,8 @@ import {
   Loader2,
   AlertCircle,
   Plus,
-  CheckCircle2
+  CheckCircle2,
+  Trash2
 } from 'lucide-react';
 
 export default function ProductManagePage() {
@@ -43,6 +46,10 @@ export default function ProductManagePage() {
   // Quản lý Modal thêm bánh mới
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+
+  // Quản lý Xóa mềm bánh
+  const [deletingProduct, setDeletingProduct] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Nạp danh mục từ Supabase
   useEffect(() => {
@@ -101,6 +108,30 @@ export default function ProductManagePage() {
       fetchProducts();
     } catch (err) {
       throw err;
+    }
+  };
+
+  // Mở modal xác nhận xóa
+  const handleOpenDeleteModal = (product) => {
+    setDeletingProduct(product);
+  };
+
+  // Xác nhận thực hiện xóa mềm
+  const handleConfirmDelete = async () => {
+    if (!deletingProduct) return;
+
+    setIsDeleting(true);
+    try {
+      await deleteProduct(deletingProduct.id);
+      setToastMessage(`Đã ngừng kinh doanh món "${deletingProduct.name}"!`);
+      setTimeout(() => setToastMessage(''), 3500);
+      setDeletingProduct(null);
+      // Tải lại danh sách sản phẩm để loại bỏ bánh vừa xóa khỏi bảng
+      fetchProducts();
+    } catch (err) {
+      alert(err.message || 'Không thể xóa bánh. Vui lòng thử lại!');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -344,6 +375,7 @@ export default function ProductManagePage() {
                     <th style={{ padding: '1rem 1.25rem' }}>Đơn giá</th>
                     <th style={{ padding: '1rem 1.25rem' }}>Mô tả</th>
                     <th style={{ padding: '1rem 1.25rem', textAlign: 'center' }}>Trạng thái</th>
+                    <th style={{ padding: '1rem 1.25rem', textAlign: 'center', width: '110px' }}>Hành động</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -450,6 +482,39 @@ export default function ProductManagePage() {
                           }}>
                             Đang mở bán
                           </span>
+                        </td>
+
+                        {/* Hành động */}
+                        <td style={{ padding: '0.85rem 1.25rem', verticalAlign: 'middle', textAlign: 'center' }}>
+                          <button
+                            onClick={() => handleOpenDeleteModal(p)}
+                            title="Xóa món bánh này"
+                            style={{
+                              backgroundColor: '#FEF2F2',
+                              color: '#EF4444',
+                              border: '1px solid #FECACA',
+                              padding: '0.45rem 0.75rem',
+                              borderRadius: '8px',
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '0.35rem',
+                              fontSize: '0.8125rem',
+                              fontWeight: '700',
+                              transition: 'all 0.15s ease'
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.backgroundColor = '#FEE2E2';
+                              e.currentTarget.style.borderColor = '#FCA5A5';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.backgroundColor = '#FEF2F2';
+                              e.currentTarget.style.borderColor = '#FECACA';
+                            }}
+                          >
+                            <Trash2 size={14} />
+                            <span>Xóa</span>
+                          </button>
                         </td>
                       </tr>
                     );
@@ -570,6 +635,15 @@ export default function ProductManagePage() {
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onSubmitSuccess={handleCreateProduct}
+      />
+
+      {/* Modal Xác Nhận Xóa Mềm */}
+      <DeleteConfirmModal
+        isOpen={Boolean(deletingProduct)}
+        onClose={() => setDeletingProduct(null)}
+        onConfirm={handleConfirmDelete}
+        productName={deletingProduct ? deletingProduct.name : ''}
+        isDeleting={isDeleting}
       />
     </div>
   );

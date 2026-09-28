@@ -1,6 +1,7 @@
 #feat/SPNB-CTSP(04)
 #feat/quan-ly-banh-danh-sach(14)
 #feat/quan-ly-banh-them-moi(15)
+#feat/quan-ly-banh-xoa-mem(17)
 
 import re
 import math
@@ -349,4 +350,52 @@ async def create_product_service(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Lỗi khi thêm bánh mới: {str(e)}"
+        )
+
+
+#feat/quan-ly-banh-xoa-mem(17)
+async def soft_delete_product_service(product_id: str) -> dict:
+    """
+    Xóa mềm (Soft Delete) sản phẩm bánh:
+    - Đổi cờ is_deleted = True
+    - Giữ nguyên bản ghi trong bảng products để các đơn hàng trong quá khứ
+      (bảng order_items) không bị lỗi khóa ngoại Foreign Key.
+    """
+    supabase = get_supabase()
+
+    # 1. Kiểm tra sản phẩm có tồn tại và chưa bị xóa không
+    existing_res = supabase.table("products").select("id, name").eq("id", product_id).eq("is_deleted", False).execute()
+    if not existing_res.data or len(existing_res.data) == 0:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Không tìm thấy sản phẩm bánh kem hoặc sản phẩm đã bị xóa trước đó."
+        )
+
+    product_name = existing_res.data[0].get("name", "Bánh kem")
+
+    # 2. Thực hiện cập nhật is_deleted = True
+    try:
+        update_res = supabase.table("products").update({
+            "is_deleted": True
+        }).eq("id", product_id).execute()
+
+        if not update_res.data:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Lỗi cập nhật trạng thái xóa trên CSDL Supabase."
+            )
+
+        return {
+            "message": f"Đã xóa mềm thành công bánh '{product_name}'. Sản phẩm đã được ngừng kinh doanh.",
+            "product_id": product_id,
+            "status": "archived"
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[ERROR soft_delete_product_service] {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Lỗi khi xóa sản phẩm bánh: {str(e)}"
         )

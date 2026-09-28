@@ -2,11 +2,17 @@
 #->feat/danh-muc(05)
 #feat/quan-ly-banh-danh-sach(14)
 #feat/quan-ly-banh-them-moi(15)
+#feat/quan-ly-banh-xoa-mem(17)
 
 from typing import List, Optional
 from fastapi import APIRouter, Depends, Query, Form, File, UploadFile, status
 from app.schemas.product import ProductResponse, ProductPaginatedResponse
-from app.services.product import get_all_products, get_admin_products_paginated, create_product_service
+from app.services.product import (
+    get_all_products,
+    get_admin_products_paginated,
+    create_product_service,
+    soft_delete_product_service
+)
 from app.dependencies import require_admin
 
 router = APIRouter(prefix="/api/products", tags=["Sản phẩm bánh (Products)"])
@@ -67,3 +73,17 @@ async def create_product(
         description=description,
         file=image
     )
+
+
+#feat/quan-ly-banh-xoa-mem(17)
+@router.delete("/{product_id}")
+async def delete_product(
+    product_id: str,
+    current_admin: dict = Depends(require_admin)
+):
+    """
+    [ADMIN ONLY] Xóa mềm sản phẩm bánh kem:
+    - Bắt buộc tài khoản có role='admin'.
+    - Không xóa cứng khỏi CSDL để bảo lưu dữ liệu các đơn hàng cũ đã đặt món bánh này.
+    """
+    return await soft_delete_product_service(product_id)
